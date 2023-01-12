@@ -86,7 +86,7 @@ Vue工程模板
 
 ## 如何贡献
 
-非常欢迎你的加入！[提一个 Issue](https://github.com/School-of-Automation-Engineering/Knock-Ding-Yanxuan/issues) 或者提交一个
+非常欢迎你的加入！[提一个 Issue](https://github.com/mason369/Knock-Ding-Yanxuan/issues) 或者提交一个
 Pull Request。
 
 Knock-Ding-Yanxuan 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范。
