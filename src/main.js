@@ -6,6 +6,15 @@ import router from "./router"
 //全局样式表
 import "./assets/scss/global.scss";
 
+//拼图验证码
+import SlideVerify from "vue-monoplasty-slide-verify";
+Vue.use(SlideVerify);
+
+//引入element-ui
+import ElementUI from "element-ui";
+import "element-ui/lib/theme-chalk/index.css";
+Vue.use(ElementUI);
+
 Vue.config.productionTip = false
 
 new Vue({

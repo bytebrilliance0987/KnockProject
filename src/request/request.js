@@ -7,7 +7,7 @@ import axios from "axios";
 //创建axios实例
 const instance = axios.create({
 	baseURL: "http://kumanxuan1.f3322.net:8881/cms",
-	headers: { "Content-Type": "application/json;charset=UTF-8" },
+	// headers: { "Content-Type": "application/json;charset=UTF-8" },
 	timeout: 7000 // 请求超时时间
 });
 //请求拦截器
