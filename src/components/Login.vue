@@ -18,7 +18,7 @@
 				<li>|</li>
 				<li
 					:class="!isShowFrom ? 'login-active' : ''"
-					@click="isShowFrom = false"
+					@click="showWeinxinLogin"
 				>
 					微信扫码登录
 				</li>
@@ -59,7 +59,9 @@
 						登录
 					</button>
 				</div>
-				<div class="wx-qrcode" v-show="!isShowFrom">二维码</div>
+				<div class="wx-qrcode" id="weixin" v-show="!isShowFrom">
+					二维码
+				</div>
 			</div>
 		</div>
 	</div>
@@ -67,21 +69,24 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { reqGetSmsCode, reqLogin } from "@/request/api";
+import { reqBindPhone, reqGetSmsCode, reqLogin } from "@/request/api";
 export default {
 	data() {
 		return {
 			isShowFrom: true,
 			msg       : "请按住滑块，拖动对应位置",
 			//手机号
-			phoneNum  : "15918796216",
+			phoneNum  : "19183879605",
 			//验证码
 			codeText  : "获取验证码",
 			SMScode   : "156"
 		};
 	},
 	methods: {
-		...mapMutations({setIsShowLoginModal: "isShowLoginModal/setIsShowLoginModal"}),
+		...mapMutations({
+			setIsShowLoginModal: "isShowLoginModal/setIsShowLoginModal",
+			setIsShowCartModal : "loginStatus/setLoginStatus"
+		}),
 		close() {
 			this.setIsShowLoginModal(false);
 		},
@@ -97,6 +102,21 @@ export default {
 		},
 		// 提交登录
 		async submitLogin() {
+			let uuid = sessionStorage.getItem("loginUuid");
+			let res = null;
+			if (uuid) {
+				res = await reqBindPhone({
+					phone     : this.phoneNum.trim(),
+					verifyCode: this.SMScode.trim(),
+					uuid
+				});
+			}
+			else {
+				res = await reqLogin({
+					phone     : this.phoneNum.trim(),
+					verifyCode: this.SMScode.trim()
+				});
+			}
 			if (!this.verify()) {
 				return;
 			}
@@ -105,19 +125,20 @@ export default {
 				this.$message.error("请输入验证码");
 				return;
 			}
-			let res = await reqLogin({
-				verifyCode: this.SMScode.trim(),
-				phone     : this.phoneNum.trim()
-			});
-			console.log(res);
+
 			//登录成功
-			if (res.code === 0) {
-				this.$message.success("登录成功");
-				this.close();
-				sessionStorage.setItem("token", res["x-auth-token"]);
+			if (!res) {
+				return;
 			}
-			else {
-				this.$message.error(res.message);
+			console.log(res);
+			this.$message.success("登录成功");
+			this.close();
+			sessionStorage.setItem("token", res["x-auth-token"]);
+			this.setIsShowCartModal(true);
+			if (uuid) {
+				sessionStorage.removeItem("loginUuid");
+				//清除地址栏code
+				await this.$router.push("/home");
 			}
 		},
 		verify() {
@@ -149,18 +170,41 @@ export default {
 		},
 		// 获取验证码
 		async onGetCode() {
+			//防抖
 			if (!this.verify()) {
 				return;
 			}
 			//发送验证码
 			let res = await reqGetSmsCode({ phone: this.phoneNum.trim() });
-			if (res.code == 0 || res.code == 400) {
+			if (res.code === 0 || res.code === 400) {
 				this.countDown();
 				this.$message.success("验证码已发送");
 			}
 			else {
 				this.$message.error(res.msg);
 			}
+		},
+		// 微信登录
+		showWeinxinLogin() {
+			// 切换到展示二维码的界面
+			this.isShowFrom = false;
+			// 获取二维码
+			// 微信登录第一步：申请微信登录二维码
+			let _this = this;
+			new WxLogin({
+				id          : "weixin",
+				appid       : "wx67cfaf9e3ad31a0d", // 这个appid要填死
+				scope       : "snsapi_login",
+				// 扫码成功后重定向的接口
+				redirect_uri: "https://sc.wolfcode.cn/cms/wechatUsers/shop/PC",
+				// state填写编码后的url
+				state       : encodeURIComponent(
+					window.btoa("http://127.0.0.1:8080" + _this.$route.path)
+				),
+				// 调用样式文件
+				href:
+					"data:text/css;base64,Lyogd3hsb2dpbi5jc3MgKi8NCi5pbXBvd2VyQm94IC50aXRsZSwgLmltcG93ZXJCb3ggLmluZm97DQogIGRpc3BsYXk6IG5vbmU7DQp9DQoNCi5pbXBvd2VyQm94IC5xcmNvZGV7DQogIG1hcmdpbi10b3A6IDIwcHg7DQp9"
+			});
 		}
 	}
 };
@@ -306,5 +350,8 @@ export default {
 			display: block;
 		}
 	}
+}
+.wx-qrcode {
+	margin-top: 100px;
 }
 </style>
