@@ -31,10 +31,21 @@
 import { mapMutations, mapState } from "vuex";
 import { reqQrcodeLogin } from "@/request/api";
 export default {
+	name: "TopBar",
 	data() {
 		return { cartTotal: 0 };
 	},
-	name   : "TopBar",
+	watch: {
+		"$route.path": {
+			deep: true,
+			handler(newVal, oldVal) {
+				let sessionToken = sessionStorage.getItem("token");
+				this.setLoginStatus(Boolean(sessionToken));
+				console.log("路由变化了");
+				console.log(newVal, oldVal);
+			}
+		}
+	},
 	methods: {
 		...mapMutations({
 			setIsShowLoginModal: "isShowLoginModal/setIsShowLoginModal",
@@ -61,12 +72,12 @@ export default {
 				}
 				else if (res.code === 400) {
 					this.$message.error(res.msg);
-					setIsShowLoginModal(true);
+					this.setIsShowLoginModal(true);
 				}
 				else if (res.code === 407) {
 					this.$message.warning("请使用手机号绑定登录微信");
 					sessionStorage.setItem("loginUuid", res.uuid);
-					setIsShowLoginModal(true);
+					this.setIsShowLoginModal(true);
 				}
 			}
 		}, 100);
