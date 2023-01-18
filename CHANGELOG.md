@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/mason369/Knock-Ding-Yanxuan/compare/v1.3.0...v1.4.0) (2023-01-18)
+
+
+### Features
+
+* 更新登录状态检测 ([92f796b](https://github.com/mason369/Knock-Ding-Yanxuan/commit/92f796bb24dbb19b29b494143db7c67d1f9199eb))
+
 ## [1.3.0](https://github.com/mason369/Knock-Ding-Yanxuan/compare/v1.2.0...v1.3.0) (2023-01-15)
 
 
