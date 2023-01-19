@@ -5,10 +5,10 @@
 			<div class="right">
 				<ul>
 					<li>
-						<img src="../assets/img/userImg.f8bbec5e.png" alt="" />
-						<span>用户名：游客</span>
+						<img :src="userInfo.headImg" alt="" />
+						<span>用户名：{{ userInfo.nickName }}</span>
 					</li>
-					<li>我的鸡腿：--</li>
+					<li>我的鸡腿：{{ userInfo.coin }}</li>
 					<li>获取鸡腿</li>
 					<li>叩丁狼官网</li>
 					<li class="btn" @click="login" v-show="!isLogined">登录</li>
@@ -28,37 +28,44 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapMutations, mapState, mapActions } from "vuex";
 import { reqQrcodeLogin } from "@/request/api";
 export default {
 	name: "TopBar",
 	data() {
-		return { cartTotal: 0 };
+		return {};
 	},
-	watch: {
-		"$route.path": {
-			deep: true,
-			handler(newVal, oldVal) {
-				let sessionToken = sessionStorage.getItem("token");
-				this.setLoginStatus(Boolean(sessionToken));
-				console.log("路由变化了");
-				console.log(newVal, oldVal);
-			}
-		}
-	},
+	// watch: {
+	// 	"$route.path": {
+	// 		deep: true,
+	// 		handler(newVal, oldVal) {
+	// 			let sessionToken = sessionStorage.getItem("token");
+	// 			this.setLoginStatus(Boolean(sessionToken));
+	// 		}
+	// 	}
+	// },
 	methods: {
 		...mapMutations({
 			setIsShowLoginModal: "isShowLoginModal/setIsShowLoginModal",
-			setLoginStatus     : "loginStatus/setLoginStatus"
+			setLoginStatus     : "loginStatus/setLoginStatus",
+			initUserInfo       : "userInfo/initUserInfo"
 		}),
+		...mapActions({ asyncGetUserInfo: "userInfo/asyncGetUserInfo" }),
 		login() {
 			// 触发登录弹窗
 			this.setIsShowLoginModal(true);
 		}
 	},
-	computed: {...mapState({ isLogined: (state) => state.loginStatus.isLogined })},
+	computed: {
+		...mapState({
+			isLogined: (state) => state.loginStatus.isLogined,
+			cartTotal: (state) => state.userInfo.cartTotal,
+			userInfo : (state) => state.userInfo.userInfo
+		})
+	},
 	created() {
-		setTimeout(async() => {
+		this.$nextTick().then(async() => {
+			//扫码登录
 			let loginCode = this.$route.query.code;
 			if (loginCode) {
 				const res = await reqQrcodeLogin({ code: loginCode });
@@ -69,6 +76,8 @@ export default {
 					this.setLoginStatus(true);
 					//清除地址栏code
 					await this.$router.push("/home");
+					//获取用户信息
+					await this.asyncGetUserInfo();
 				}
 				else if (res.code === 400) {
 					this.$message.error(res.msg);
@@ -80,7 +89,20 @@ export default {
 					this.setIsShowLoginModal(true);
 				}
 			}
-		}, 100);
+			else {
+				//正常登陆
+				let sessionToken = sessionStorage.getItem("token");
+				this.setLoginStatus(Boolean(sessionToken));
+				if (sessionToken) {
+					//有登录获取用户信息
+					await this.asyncGetUserInfo();
+				}
+				else {
+					//没有登录,初始化用户信息
+					await this.initUserInfo();
+				}
+			}
+		});
 	}
 };
 </script>
