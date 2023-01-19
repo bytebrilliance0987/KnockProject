@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/mason369/Knock-Ding-Yanxuan/compare/v1.4.0...v1.5.0) (2023-01-19)
+
+
+### Features
+
+* 更新首页组件、商品详情，修复登录状态检测 ([4483592](https://github.com/mason369/Knock-Ding-Yanxuan/commit/4483592f0f05b3dbff58baab5615065c89eb586b))
+
 ## [1.4.0](https://github.com/mason369/Knock-Ding-Yanxuan/compare/v1.3.0...v1.4.0) (2023-01-18)
 
 
